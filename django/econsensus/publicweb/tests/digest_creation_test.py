@@ -5,13 +5,14 @@ from notification.models import ObservedItem
 from publicweb.models import Decision
 from minimock import mock, Mock
 from publicweb.digest_managers import EmailDigestManager
+from digested.digest_managers import BaseDigestManager
 
 class DigestCreationTest(TestCase):
     def setUp(self):
         self.users = N(User, n=5)
         self.decisions = N(Decision, n=2)
         objects = Mock('Decision.objects')
-        objects.all = self.decision_list
+        objects.all = self._decision_list
 
         mock('Decision.objects', mock_obj=objects)
         for index, user in enumerate(self.users):
@@ -27,9 +28,13 @@ class DigestCreationTest(TestCase):
         self.decisions[0].watchers = self.observed_items[0]
         self.decisions[1].watchers = self.observed_items[1]
     
-    def decision_list(self):
+    def _decision_list(self):
         return self.decisions
     
+    def test_digest_manager_is_a_subclass_of_base_digest_manager(self):
+        the_manager = EmailDigestManager()
+        self.assertIsInstance(the_manager, BaseDigestManager)
+        
     def test_get_items_returns_decisions(self):
         the_manager = EmailDigestManager()
         actual_items = the_manager.get_items()
