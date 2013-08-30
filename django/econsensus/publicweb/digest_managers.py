@@ -7,3 +7,6 @@ class EmailDigestManager(BaseDigestManager):
     
     def get_items(self):
         return Decision.objects.all()
+    
+    def get_subscribers_for_item(self, item):
+        return item.watchers.all()

@@ -21,9 +21,9 @@ class DigestCreationTest(TestCase):
         for index, decision in enumerate(self.decisions):
             decision.id = index
         self.observed_items = [[
-           N(ObservedItem, decision=self.decisions[0], user=user) 
+           N(ObservedItem, observed_object=self.decisions[0], user=user) 
                for user in self.users[:3]],
-           [N(ObservedItem, decision=self.decisions[1], user=user) 
+           [N(ObservedItem, observed_object=self.decisions[1], user=user) 
                for user in self.users[3:]]
                ]
         self.decisions[0].watchers = self.observed_items[0]
@@ -45,3 +45,13 @@ class DigestCreationTest(TestCase):
     def test_digest_manager_default_preference_is_daily(self):
         the_manager = EmailDigestManager()
         self.assertEqual(PREFERENCE_DAILY, the_manager.default_preference)
+    
+    def test_subscribers_for_a_decision_are_the_watchers(self):
+        the_manager = EmailDigestManager()
+        decision = Decision.objects.all()[0]
+        subscribers = the_manager.get_subscribers_for_item(decision)
+        expected_subscribers = [(subscription.object_id, subscription.user_id)
+                                for subscription in self.observed_items[0]]
+        actual_subscribers = [(subscription.object_id, subscription.user_id)
+                                for subscription in subscribers] 
+        self.assertSequenceEqual(expected_subscribers, actual_subscribers)
