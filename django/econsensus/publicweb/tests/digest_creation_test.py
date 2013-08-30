@@ -6,6 +6,7 @@ from publicweb.models import Decision
 from minimock import mock, Mock
 from publicweb.digest_managers import EmailDigestManager
 from digested.digest_managers import BaseDigestManager
+from digested.models import PREFERENCE_DAILY
 
 class DigestCreationTest(TestCase):
     def setUp(self):
@@ -40,4 +41,7 @@ class DigestCreationTest(TestCase):
         actual_items = the_manager.get_items()
         expected_items = Decision.objects.all()
         self.assertSequenceEqual(expected_items, actual_items)
-        
+    
+    def test_digest_manager_default_preference_is_daily(self):
+        the_manager = EmailDigestManager()
+        self.assertEqual(PREFERENCE_DAILY, the_manager.default_preference)
