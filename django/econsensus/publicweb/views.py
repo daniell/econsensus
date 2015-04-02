@@ -1,6 +1,6 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.contrib.comments.models import Comment
+from django_comments.models import Comment
 from django.contrib.contenttypes.models import ContentType
 from django.http import (HttpResponse, HttpResponseRedirect,
     HttpResponseForbidden, Http404)
@@ -32,6 +32,8 @@ from actionitems.views import (ActionItemCreateView, ActionItemUpdateView,
     ActionItemListView)
 from django.core.urlresolvers import reverse
 from signals.management import DECISION_CHANGE
+from django.core.paginator import EmptyPage
+
 
 class YourDetails(UpdateView):
     template_name = 'your_details.html'
@@ -380,15 +382,21 @@ class DecisionList(ListView):
         if not context['page_obj']:
             return None
         else:
-            return self.build_query_string(context,
-                context['page_obj'].previous_page_number())
+            if context['page_obj'].number > 1:
+                previous_page_number = context['page_obj'].previous_page_number()
+            else:
+                previous_page_number = 1
+            return self.build_query_string(context, previous_page_number)
 
     def build_next_query_string(self, context):
         if not context['page_obj']:
             return None
         else:
-            return self.build_query_string(context,
-                context['page_obj'].next_page_number())
+            try:
+                next_page_number = context['page_obj'].next_page_number()
+            except EmptyPage:
+                next_page_number = 1
+            return self.build_query_string(context, next_page_number)
 
     def build_query_string(self, context, page_num):
         page_query = 'page=' + str(page_num)
