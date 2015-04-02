@@ -1,4 +1,4 @@
-from django.conf.urls.defaults import patterns, include, url
+from django.conf.urls import patterns, include, url
 from django.contrib import admin
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.core.urlresolvers import reverse_lazy
@@ -17,7 +17,7 @@ urlpatterns = patterns(
     url(r'^admin/', include(admin.site.urls), name='admin'),
     url(r'^settings/', include('livesettings.urls')),
     url(r'^notification/', include('notification.urls')),
-    url(r'^comments/', include('django.contrib.comments.urls')),
+    url(r'^comments/', include('django_comments.urls')),
     url(r'^organizations/', include('custom_organizations.urls')),
     url(r'^invitations/', include(invitation_backend().get_urls())),
     # the pages adds a / at the start, so don't put the / after pages

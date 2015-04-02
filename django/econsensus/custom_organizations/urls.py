@@ -1,4 +1,4 @@
-from django.conf.urls.defaults import patterns, include, url
+from django.conf.urls import patterns, url, include
 from django.contrib.auth.decorators import login_required
 from views import (OrganizationAdminView,
                   CustomOrganizationCreate,

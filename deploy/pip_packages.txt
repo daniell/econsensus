@@ -4,27 +4,28 @@ virtualenv
 -e git+git://github.com/aptivate/dye.git@0ebe0738bbfda715caeeb95e7e18f7463adf714c#egg=dye
 
 # core django
-Django==1.4.13
+Django==1.7.4
+django-markup-deprecated==0.0.3
 mysql-python==1.2.3
-South==0.7.5
 
-django-tinymce==1.5.1a2
+-e git+https://github.com/aljosa/django-tinymce.git@f80966cef06851a6b351293e8a92ca0c623ef3f5#egg=django-tinymce
 mechanize==0.2.5
-django-floppyforms==0.4.5
+django-floppyforms==1.3.0
 lxml==2.2.4
 BeautifulSoup==3.2.0
 git+git://github.com/jdunck/python-unicodecsv.git
 django-tagging==0.3.1
-hg+https://bitbucket.org/bkroeze/django-livesettings
-django-keyedcache==1.4-6
-django-registration==1.0
+django-livesettings==1.4-14
+django-keyedcache==1.5.1
+django-registration-redux==1.1
 -e ../django/django-organizations
 git+git://github.com/aptivate/django-notification.git@emails-with-headers
-git+git://github.com/birdsarah/django-actionitems.git
-django-guardian==1.1.1
+git+git://github.com/daniell/django-actionitems.git
+django-guardian==1.2.5
 django-remember_me==0.2d0
 django-parsley==0.0.2a0
-django-waffle==0.9.1
+django-waffle==0.10.1
+django-contrib-comments
 Markdown==2.3.1
 -e git+git://github.com/aptivate/aptivate-monkeypatch.git@ed4f821d8d57ba181c418b8d78dfd8bca70d6817#egg=aptivate_monkeypatch
 
@@ -46,4 +47,4 @@ django-selenium==0.9.6
 pytz==2013d
 
 # only required for developer machines
-django-debug-toolbar==0.9.4
+django-debug-toolbar==1.3.0

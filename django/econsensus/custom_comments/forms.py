@@ -1,4 +1,4 @@
-from django.contrib.comments.forms import CommentForm, COMMENT_MAX_LENGTH
+from django_comments.forms import CommentForm, COMMENT_MAX_LENGTH
 from django.utils.translation import ungettext, ugettext_lazy as _
 from django import forms
 from parsley.decorators import parsleyfy

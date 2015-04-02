@@ -81,6 +81,7 @@ class SettingsTest(SimpleTestCase):
 
         notification_settings_view.object = MagicMock(spec=NotificationSettings)
         notification_settings_view.organization = create_fake_organization(id=2)
+        notification_settings_view.context_object_name = 'settings'
         context = notification_settings_view.get_context_data()
         self.assertIn('organization', context)
         self.assertTrue(context['organization'])
