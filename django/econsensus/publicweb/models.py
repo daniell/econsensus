@@ -26,7 +26,6 @@ from publicweb.utils import get_excerpt
 # TODO: Status codes could possibly be harvested off into its
 # own class with accessor methods to return values.
 
-from south.modelsinspector import add_introspection_rules
 from signals.management import (DECISION_CHANGE, MINOR_CHANGE, DECISION_NEW,
     FEEDBACK_NEW, FEEDBACK_CHANGE, COMMENT_NEW, DECISION_STATUS_CHANGE)
 from publicweb.observation_manager import ObservationManager
@@ -36,10 +35,8 @@ from publicweb.observation_manager import ObservationManager
 from publicweb.extra_models import (STANDARD_SENDING_HEADERS,
     NotificationSettings, FEEDBACK_MAJOR_CHANGES)  # pylint: disable=W0611
 from django.dispatch.dispatcher import receiver
-from django.contrib.comments.models import Comment
-from django.contrib.comments.signals import comment_was_posted
-
-add_introspection_rules([], ["^tagging\.fields\.TagField"])
+from django_comments.models import Comment
+from django_comments.signals import comment_was_posted
 
 
 class Decision(models.Model):
@@ -245,7 +242,7 @@ class Feedback(models.Model):
     author = models.ForeignKey(User, blank=True, null=True, editable=False, related_name="%(app_label)s_%(class)s_related")
     editor = models.ForeignKey(User, blank=True, null=True, editable=False, related_name="%(app_label)s_%(class)s_edited")
     decision = models.ForeignKey('Decision', verbose_name=_('Decision'))
-    resolved = models.BooleanField(verbose_name=_('Resolved'))
+    resolved = models.BooleanField(verbose_name=_('Resolved'), default=False)
     rating = models.IntegerField(choices=RATING_CHOICES, default=COMMENT_STATUS)
 
     watchers = generic.GenericRelation(notification.ObservedItem)
@@ -311,6 +308,7 @@ def additional_message_required(user, decision, level):
 
     return result
 
+
 def change_observers(watch, decision, watcher):
     if watch:
         if not notification.is_observing(decision, watcher):
@@ -318,6 +316,7 @@ def change_observers(watch, decision, watcher):
     else:
         if notification.is_observing(decision, watcher):
             notification.stop_observing(decision, watcher)
+
 
 @receiver(models.signals.post_save, sender=Decision, dispatch_uid="publicweb.models.decision_signal_handler")
 def decision_signal_handler(sender, **kwargs):
@@ -368,6 +367,7 @@ def feedback_signal_handler(sender, **kwargs):
             observation_manager.send_notifications(org_users, instance, FEEDBACK_CHANGE, extra_context, headers, from_email=instance.decision.get_email())
         else:
             observation_manager.send_notifications(org_users, instance, MINOR_CHANGE, extra_context, headers, from_email=instance.decision.get_email())
+
 
 @receiver(comment_was_posted, sender=Comment, dispatch_uid="publicweb.models.comment_posted_signal_handler")
 def comment_posted_signal_handler(sender, **kwargs):
