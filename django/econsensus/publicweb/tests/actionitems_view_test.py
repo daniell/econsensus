@@ -280,3 +280,25 @@ class ActionitemsViewTest(DecisionTestCase):
         view.dispatch(request)
 
         self.assertFalse(actionitem.done)
+
+    def test_action_item_set_done_for_non_existant_item_returns_404(self):
+        actionitem = ActionItem.objects.create()
+        user = self.betty
+
+        view = SetActionItemDone()
+
+        request = RequestFactory().get('/', {'next': reverse('actionitem_list', args=[self.bettysorg.slug])})
+        request.user = user
+
+        self.assertRaises(Http404, view.dispatch, request, actionitem_id=actionitem.id + 1)
+
+    def test_action_item_unset_done_for_non_existant_item_returns_404(self):
+        actionitem = ActionItem.objects.create()
+        user = self.betty
+
+        view = UnsetActionItemDone()
+
+        request = RequestFactory().get('/', {'next': reverse('actionitem_list', args=[self.bettysorg.slug])})
+        request.user = user
+
+        self.assertRaises(Http404, view.dispatch, request, actionitem_id=actionitem.id + 1)

@@ -1,5 +1,7 @@
-from django.views.generic.base import View
 from django.http import HttpResponseRedirect
+from django.shortcuts import get_object_or_404
+from django.utils.decorators import method_decorator
+from django.views.generic.base import View
 
 from actionitems.models import ActionItem
 from notification import models as notification
@@ -8,7 +10,6 @@ from signals.management import DECISION_CHANGE
 from .models import Decision
 from guardian.mixins import PermissionRequiredMixin, LoginRequiredMixin
 from socket import meth
-from django.utils.decorators import method_decorator
 
 
 class BaseSingleActionView(LoginRequiredMixin, View):
@@ -40,9 +41,10 @@ class BaseWatcherView(BaseSingleActionView):
 
 
 class BaseActionItemView(BaseSingleActionView):
+    """ Base single action view for set/unset action item done views """
     def get_object(self):
         object_id = self.kwargs['actionitem_id']
-        actionitem = ActionItem.objects.get(pk=object_id)
+        actionitem = get_object_or_404(ActionItem, pk=object_id)
         return actionitem
 
 
@@ -66,15 +68,13 @@ class SetActionItemDone(BaseActionItemView):
     """ Single action view used to set an action item as done """
     def do_action(self):
         actionitem = self.get_object()
-        if actionitem:
-            actionitem.done = True
-            actionitem.save()
+        actionitem.done = True
+        actionitem.save()
 
 
 class UnsetActionItemDone(BaseActionItemView):
     """ Single action view used to unset an action item's done status """
     def do_action(self):
         actionitem = self.get_object()
-        if actionitem:
-            actionitem.done = False
-            actionitem.save()
+        actionitem.done = False
+        actionitem.save()
