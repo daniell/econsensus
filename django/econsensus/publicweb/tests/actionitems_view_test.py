@@ -1,7 +1,9 @@
-from django.utils.unittest import TestCase
-from django.test.client import RequestFactory
+from django.contrib.auth.models import User, AnonymousUser
 from django.core.urlresolvers import reverse, resolve
-from django.contrib.auth.models import User
+from django.http import Http404
+from django.test.client import RequestFactory
+from django.utils.unittest import TestCase
+
 from BeautifulSoup import BeautifulSoup
 from waffle import Switch
 
@@ -11,6 +13,7 @@ from actionitems.models import ActionItem
 
 from publicweb.forms import (EconsensusActionItemCreateForm,
                              EconsensusActionItemUpdateForm)
+from publicweb.single_action_views import SetActionItemDone, UnsetActionItemDone
 from publicweb.views import (EconsensusActionitemCreateView,
                              EconsensusActionitemUpdateView,
                              EconsensusActionitemListView)
@@ -221,3 +224,59 @@ class ActionitemsViewTest(DecisionTestCase):
         response.render()
         soup = BeautifulSoup(str(response.content))
         assert soup.find("p", {"class": "wrongorg"})
+
+    def test_set_done_view_requires_user_to_be_logged_in(self):
+        actionitem = ActionItem.objects.create()
+        user = AnonymousUser()
+
+        view = SetActionItemDone()
+        view.get_object = lambda: actionitem
+
+        request = RequestFactory().get('/', {'next': reverse('actionitem_list', args=[self.bettysorg.slug])})
+        request.user = user
+
+        response = view.dispatch(request)
+
+        self.assertEqual('/accounts/login/?next=/%3Fnext%3D%252Fcountry-critters%252Factionitem%252Flist%252F', response['Location'])
+
+    def test_remove_watcher_view_requires_user_to_be_logged_in(self):
+        actionitem = ActionItem.objects.create()
+        user = AnonymousUser()
+
+        view = UnsetActionItemDone()
+        view.get_object = lambda: actionitem
+
+        request = RequestFactory().get('/', {'next': reverse('actionitem_list', args=[self.bettysorg.slug])})
+        request.user = user
+
+        response = view.dispatch(request)
+
+        self.assertEqual('/accounts/login/?next=/%3Fnext%3D%252Fcountry-critters%252Factionitem%252Flist%252F', response['Location'])
+
+    def test_action_item_set_done_sets_item_done(self):
+        actionitem = ActionItem.objects.create()
+        user = self.betty
+
+        view = SetActionItemDone()
+        view.get_object = lambda: actionitem
+
+        request = RequestFactory().get('/', {'next': reverse('actionitem_list', args=[self.bettysorg.slug])})
+        request.user = user
+
+        view.dispatch(request)
+
+        self.assertTrue(actionitem.done)
+
+    def test_action_item_unset_done_sets_item_not_done(self):
+        actionitem = ActionItem.objects.create(done=True)
+        user = self.betty
+
+        view = UnsetActionItemDone()
+        view.get_object = lambda: actionitem
+
+        request = RequestFactory().get('/', {'next': reverse('actionitem_list', args=[self.bettysorg.slug])})
+        request.user = user
+
+        view.dispatch(request)
+
+        self.assertFalse(actionitem.done)

@@ -11,7 +11,7 @@ from socket import meth
 from django.utils.decorators import method_decorator
 
 
-class BaseSingleActionView(View):
+class BaseSingleActionView(LoginRequiredMixin, View):
     """ SingleActionViews are views used to perform a single, simple
         action such as marking an item as done. This used with a
         redirection to provide quick, one-click actions that do
@@ -28,7 +28,7 @@ class BaseSingleActionView(View):
         return HttpResponseRedirect(request.GET['next'])
 
 
-class BaseWatcherView(LoginRequiredMixin, BaseSingleActionView):
+class BaseWatcherView(BaseSingleActionView):
     """ Base single action view for add/remove watcher views """
     def get_object(self):
         object_id = self.kwargs['decision_id']
@@ -37,6 +37,13 @@ class BaseWatcherView(LoginRequiredMixin, BaseSingleActionView):
 
     def get_user(self):
         return self.request.user
+
+
+class BaseActionItemView(BaseSingleActionView):
+    def get_object(self):
+        object_id = self.kwargs['actionitem_id']
+        actionitem = ActionItem.objects.get(pk=object_id)
+        return actionitem
 
 
 class AddWatcher(BaseWatcherView):
@@ -55,19 +62,19 @@ class RemoveWatcher(BaseWatcherView):
         notification.stop_observing(decision, user)
 
 
-class SetActionItemDone(View):
+class SetActionItemDone(BaseActionItemView):
     """ Single action view used to set an action item as done """
     def do_action(self):
-        actionitem = ActionItem.objects.get(pk=self.kwargs['actionitem_id'])
+        actionitem = self.get_object()
         if actionitem:
             actionitem.done = True
             actionitem.save()
 
 
-class UnsetActionItemDone(View):
+class UnsetActionItemDone(BaseActionItemView):
     """ Single action view used to unset an action item's done status """
     def do_action(self):
-        actionitem = ActionItem.objects.get(pk=self.kwargs['actionitem_id'])
+        actionitem = self.get_object()
         if actionitem:
             actionitem.done = False
             actionitem.save()
