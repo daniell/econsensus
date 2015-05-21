@@ -6,22 +6,21 @@ from mock import patch, MagicMock
 from signals.management import DECISION_CHANGE
 
 from publicweb.models import Decision
-from publicweb.views import AddWatcher, RemoveWatcher
+from publicweb.single_action_views import AddWatcher, RemoveWatcher
 
 
 class WatcherViewTests(SimpleTestCase):
 
-    @patch('publicweb.views.notification')
+    @patch('publicweb.single_action_views.notification')
     def test_add_watcher_view_adds_observer_to_item(self, notifications):
         decision = N(Decision)
         user = N(User)
 
-        mock_view = MagicMock(spec=AddWatcher)
-        mock_view.get_object = lambda: decision
-        mock_view.get_user = lambda: user
-        mock_view.get = AddWatcher.get
+        view = AddWatcher()
+        view.get_object = lambda: decision
+        view.get_user = lambda: user
 
-        mock_view.get(mock_view, RequestFactory().get('/', {'next': '/'}))
+        view.get(RequestFactory().get('/', {'next': '/'}))
         notifications.observe.assert_called_with(
             decision, user, DECISION_CHANGE)
 
@@ -42,15 +41,14 @@ class WatcherViewTests(SimpleTestCase):
 
         self.assertEqual(user, view.get_user())
 
-    @patch('publicweb.views.notification')
+    @patch('publicweb.single_action_views.notification')
     def test_remove_watcher_view_removes_observer_from_item(self, notifications):
         decision = N(Decision)
         user = N(User)
 
-        mock_view = MagicMock(spec=RemoveWatcher)
-        mock_view.get_object = lambda: decision
-        mock_view.get_user = lambda: user
-        mock_view.get = RemoveWatcher.get
+        view = RemoveWatcher()
+        view.get_object = lambda: decision
+        view.get_user = lambda: user
 
-        mock_view.get(mock_view, RequestFactory().get('/', {'next': '/'}))
+        view.get(RequestFactory().get('/', {'next': '/'}))
         notifications.stop_observing.assert_called_with(decision, user)
