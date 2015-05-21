@@ -944,29 +944,3 @@ class DecisionSearchView(SearchView):
         def search_view(request, *args, **kwargs):
             return cls()(request, *args, **kwargs)
         return login_required(search_view)
-
-
-class BaseWatcherView(View):
-    def get_object(self):
-        object_id = self.kwargs['decision_id']
-        decision = Decision.objects.get(pk=object_id)
-        return decision
-
-    def get_user(self):
-        return self.request.user
-
-
-class AddWatcher(BaseWatcherView):
-    def get(self, request, *args, **kwargs):
-        decision = self.get_object()
-        user = self.get_user()
-        notification.observe(decision, user, DECISION_CHANGE)
-        return HttpResponseRedirect(request.GET['next'])
-
-
-class RemoveWatcher(BaseWatcherView):
-    def get(self, request, *args, **kwargs):
-        decision = self.get_object()
-        user = self.get_user()
-        notification.stop_observing(decision, user)
-        return HttpResponseRedirect(request.GET['next'])
