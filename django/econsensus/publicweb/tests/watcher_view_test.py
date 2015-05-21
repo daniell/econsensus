@@ -1,6 +1,8 @@
 from django.contrib.auth.models import User, AnonymousUser
+from django.http import Http404
 from django.test.client import RequestFactory
 from django.test.testcases import SimpleTestCase
+
 from django_dynamic_fixture import N
 from mock import patch, MagicMock
 from signals.management import DECISION_CHANGE
@@ -28,13 +30,13 @@ class WatcherViewTests(SimpleTestCase):
         notifications.observe.assert_called_with(
             decision, user, DECISION_CHANGE)
 
-    @patch("publicweb.views.Decision.objects")
+    @patch("publicweb.single_action_views.get_object_or_404")
     def test_get_object_tries_to_get_decision(self, decisions):
         view = AddWatcher()
         view.args = []
         view.kwargs = {'decision_id': 1}
         view.get_object()
-        decisions.get.assert_called_with(pk=1)
+        decisions.assert_called_with(Decision, pk=1)
 
     def test_get_user_looks_for_user_in_request(self):
         user = N(User)
@@ -87,3 +89,25 @@ class WatcherViewTests(SimpleTestCase):
         response = view.dispatch(request)
 
         self.assertEqual('/accounts/login/?next=/%3Fnext%3D%252F', response['Location'])
+
+    def test_add_watcher_for_non_existant_item_returns_404(self):
+        user = N(User)
+
+        view = AddWatcher()
+
+        request = RequestFactory().get('/', {'next': '/'})
+        request.user = user
+        self.assertFalse(Decision.objects.exists())
+
+        self.assertRaises(Http404, view.dispatch, request, decision_id=1)
+
+    def test_action_item_unset_done_for_non_existant_item_returns_404(self):
+        user = N(User)
+
+        view = AddWatcher()
+
+        request = RequestFactory().get('/', {'next': '/'})
+        request.user = user
+        self.assertFalse(Decision.objects.exists())
+
+        self.assertRaises(Http404, view.dispatch, request, decision_id=1)

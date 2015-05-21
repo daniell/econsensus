@@ -1,15 +1,13 @@
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404
-from django.utils.decorators import method_decorator
 from django.views.generic.base import View
 
 from actionitems.models import ActionItem
+from guardian.mixins import LoginRequiredMixin
 from notification import models as notification
 from signals.management import DECISION_CHANGE
 
 from .models import Decision
-from guardian.mixins import PermissionRequiredMixin, LoginRequiredMixin
-from socket import meth
 
 
 class BaseSingleActionView(LoginRequiredMixin, View):
@@ -33,7 +31,7 @@ class BaseWatcherView(BaseSingleActionView):
     """ Base single action view for add/remove watcher views """
     def get_object(self):
         object_id = self.kwargs['decision_id']
-        decision = Decision.objects.get(pk=object_id)
+        decision = get_object_or_404(Decision, pk=object_id)
         return decision
 
     def get_user(self):
