@@ -1,4 +1,4 @@
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, AnonymousUser
 from django.test.client import RequestFactory
 from django.test.testcases import SimpleTestCase
 from django_dynamic_fixture import N
@@ -18,9 +18,13 @@ class WatcherViewTests(SimpleTestCase):
 
         view = AddWatcher()
         view.get_object = lambda: decision
-        view.get_user = lambda: user
 
-        view.get(RequestFactory().get('/', {'next': '/'}))
+        request = RequestFactory().get('/', {'next': '/'})
+        request.user = user
+
+        view.request = request
+        view.get(request)
+
         notifications.observe.assert_called_with(
             decision, user, DECISION_CHANGE)
 
@@ -48,7 +52,38 @@ class WatcherViewTests(SimpleTestCase):
 
         view = RemoveWatcher()
         view.get_object = lambda: decision
-        view.get_user = lambda: user
 
-        view.get(RequestFactory().get('/', {'next': '/'}))
+        request = RequestFactory().get('/', {'next': '/'})
+        request.user = user
+
+        view.request = request
+        view.get(request)
         notifications.stop_observing.assert_called_with(decision, user)
+
+    def test_add_watcher_view_requires_user_to_be_logged_in(self):
+        decision = N(Decision)
+        user = AnonymousUser()
+
+        view = AddWatcher()
+        view.get_object = lambda: decision
+
+        request = RequestFactory().get('/', {'next': '/'})
+        request.user = user
+
+        response = view.dispatch(request)
+
+        self.assertEqual('/accounts/login/?next=/%3Fnext%3D%252F', response['Location'])
+
+    def test_remove_watcher_view_requires_user_to_be_logged_in(self):
+        decision = N(Decision)
+        user = AnonymousUser()
+
+        view = RemoveWatcher()
+        view.get_object = lambda: decision
+
+        request = RequestFactory().get('/', {'next': '/'})
+        request.user = user
+
+        response = view.dispatch(request)
+
+        self.assertEqual('/accounts/login/?next=/%3Fnext%3D%252F', response['Location'])

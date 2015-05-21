@@ -1,9 +1,14 @@
-from actionitems.models import ActionItem
 from django.views.generic.base import View
 from django.http import HttpResponseRedirect
+
+from actionitems.models import ActionItem
 from notification import models as notification
-from publicweb.models import Decision
 from signals.management import DECISION_CHANGE
+
+from .models import Decision
+from guardian.mixins import PermissionRequiredMixin, LoginRequiredMixin
+from socket import meth
+from django.utils.decorators import method_decorator
 
 
 class BaseSingleActionView(View):
@@ -23,7 +28,7 @@ class BaseSingleActionView(View):
         return HttpResponseRedirect(request.GET['next'])
 
 
-class BaseWatcherView(BaseSingleActionView):
+class BaseWatcherView(LoginRequiredMixin, BaseSingleActionView):
     """ Base single action view for add/remove watcher views """
     def get_object(self):
         object_id = self.kwargs['decision_id']
