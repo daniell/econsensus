@@ -17,6 +17,8 @@ from publicweb.single_action_views import SetActionItemDone, UnsetActionItemDone
 from publicweb.views import (EconsensusActionitemCreateView,
                              EconsensusActionitemUpdateView,
                              EconsensusActionitemListView)
+from django_dynamic_fixture import G
+from publicweb.models import Decision
 
 
 class ActionitemsViewTestFast(TestCase):
@@ -254,7 +256,8 @@ class ActionitemsViewTest(DecisionTestCase):
         self.assertEqual('/accounts/login/?next=/%3Fnext%3D%252Fcountry-critters%252Factionitem%252Flist%252F', response['Location'])
 
     def test_action_item_set_done_sets_item_done(self):
-        actionitem = ActionItem.objects.create()
+        decision = G(Decision, organization=self.bettysorg)
+        actionitem = ActionItem.objects.create(origin=decision)
         user = self.betty
 
         view = SetActionItemDone()
@@ -268,7 +271,8 @@ class ActionitemsViewTest(DecisionTestCase):
         self.assertTrue(actionitem.done)
 
     def test_action_item_unset_done_sets_item_not_done(self):
-        actionitem = ActionItem.objects.create(done=True)
+        decision = G(Decision, organization=self.bettysorg)
+        actionitem = ActionItem.objects.create(done=True, origin=decision)
         user = self.betty
 
         view = UnsetActionItemDone()
@@ -277,12 +281,13 @@ class ActionitemsViewTest(DecisionTestCase):
         request = RequestFactory().get('/', {'next': reverse('actionitem_list', args=[self.bettysorg.slug])})
         request.user = user
 
-        view.dispatch(request)
+        view.dispatch(request, actionitem_id=actionitem.id)
 
         self.assertFalse(actionitem.done)
 
     def test_action_item_set_done_for_non_existant_item_returns_404(self):
-        actionitem = ActionItem.objects.create()
+        decision = G(Decision, organization=self.bettysorg)
+        actionitem = ActionItem.objects.create(origin=decision)
         user = self.betty
 
         view = SetActionItemDone()
@@ -293,7 +298,32 @@ class ActionitemsViewTest(DecisionTestCase):
         self.assertRaises(Http404, view.dispatch, request, actionitem_id=actionitem.id + 1)
 
     def test_action_item_unset_done_for_non_existant_item_returns_404(self):
-        actionitem = ActionItem.objects.create()
+        decision = G(Decision, organization=self.bettysorg)
+        actionitem = ActionItem.objects.create(origin=decision)
+        user = self.betty
+
+        view = UnsetActionItemDone()
+
+        request = RequestFactory().get('/', {'next': reverse('actionitem_list', args=[self.bettysorg.slug])})
+        request.user = user
+
+        self.assertRaises(Http404, view.dispatch, request, actionitem_id=actionitem.id + 1)
+
+    def test_action_item_set_done_for_item_for_different_org_returns_404(self):
+        decision = G(Decision)
+        actionitem = ActionItem.objects.create(origin=decision)
+        user = self.betty
+
+        view = SetActionItemDone()
+
+        request = RequestFactory().get('/', {'next': reverse('actionitem_list', args=[self.bettysorg.slug])})
+        request.user = user
+
+        self.assertRaises(Http404, view.dispatch, request, actionitem_id=actionitem.id + 1)
+
+    def test_action_item_unset_done_for_item_for_different_org_returns_404(self):
+        decision = G(Decision)
+        actionitem = ActionItem.objects.create(origin=decision)
         user = self.betty
 
         view = UnsetActionItemDone()
