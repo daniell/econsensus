@@ -7,6 +7,7 @@ from guardian.mixins import LoginRequiredMixin
 from notification import models as notification
 from signals.management import DECISION_CHANGE
 
+from .custom_decorators import is_org_member
 from .models import Decision
 
 
@@ -22,6 +23,7 @@ class BaseSingleActionView(LoginRequiredMixin, View):
         - Requests are expected to contains a GET parameter 'next' then the
         user will be redirected to the given URL.
     """
+    @is_org_member
     def get(self, request, *args, **kwargs):
         self.do_action()
         return HttpResponseRedirect(request.GET['next'])

@@ -4,19 +4,21 @@ from django.test.client import RequestFactory
 from django.test.testcases import SimpleTestCase
 
 from django_dynamic_fixture import N
-from mock import patch, MagicMock
+from mock import patch, Mock
+from organizations.models import Organization
 from signals.management import DECISION_CHANGE
 
-from publicweb.models import Decision
-from publicweb.single_action_views import AddWatcher, RemoveWatcher
+from ..models import Decision
+from ..single_action_views import AddWatcher, RemoveWatcher
 
 
-class WatcherViewTests(SimpleTestCase):
+class WatcherViewTest(SimpleTestCase):
 
     @patch('publicweb.single_action_views.notification')
     def test_add_watcher_view_adds_observer_to_item(self, notifications):
-        decision = N(Decision)
-        user = N(User)
+        organization = N(Organization)
+        decision = N(Decision, organization=organization)
+        user = Mock(spec=User, id=1, organization_set=Mock(all=lambda: [organization]))
 
         view = AddWatcher()
         view.get_object = lambda: decision
@@ -49,8 +51,9 @@ class WatcherViewTests(SimpleTestCase):
 
     @patch('publicweb.single_action_views.notification')
     def test_remove_watcher_view_removes_observer_from_item(self, notifications):
-        decision = N(Decision)
-        user = N(User)
+        organization = N(Organization)
+        decision = N(Decision, organization=organization)
+        user = Mock(spec=User, id=1, organization_set=Mock(all=lambda: [organization]))
 
         view = RemoveWatcher()
         view.get_object = lambda: decision
@@ -101,13 +104,30 @@ class WatcherViewTests(SimpleTestCase):
 
         self.assertRaises(Http404, view.dispatch, request, decision_id=1)
 
-    def test_action_item_unset_done_for_non_existant_item_returns_404(self):
-        user = N(User)
+    def test_add_watcher_for_item_from_different_org_returns_404(self):
+        organization = N(Organization)
+        user = Mock(spec=User, id=1, organization_set=Mock(all=lambda: [organization]))
+        decision = N(Decision)
 
         view = AddWatcher()
+        view.get_object = lambda: decision
 
         request = RequestFactory().get('/', {'next': '/'})
         request.user = user
         self.assertFalse(Decision.objects.exists())
 
         self.assertRaises(Http404, view.dispatch, request, decision_id=1)
+
+    def test_remove_watcher_for_item_from_different_org_returns_404(self):
+        organization = N(Organization)
+        user = Mock(spec=User, id=1, organization_set=Mock(all=lambda: [organization]))
+        decision = N(Decision)
+
+        view = RemoveWatcher()
+        view.get_object = lambda: decision
+
+        request = RequestFactory().get('/', {'next': '/'})
+        request.user = user
+
+        self.assertRaises(Http404, view.dispatch, request, decision_id=1)
+
