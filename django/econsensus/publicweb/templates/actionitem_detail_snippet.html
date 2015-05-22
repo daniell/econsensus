@@ -26,6 +26,11 @@
 		 {% else %}{% trans "No deadline" %}
 		 {% endif %}
 	       </li>
+	       <li>
+	           <a href="{% if object.done %}{% url 'unset_actionitem_done' object.id %}{% else %}{% url 'set_actionitem_done' object.id %}{% endif %}?next={{ request.path_info }}" aria-label="{% if object.done %}Mark item as not done.{% else %}Mark item as done{% endif %}">
+                   {% if object.done %}&#x2611;{% else %}&#x2610;{% endif %} {% trans "Done" %} 
+               </a>
+	       </li>
 	     </ul>
 	   </div>
 	   

@@ -66,6 +66,11 @@
                             {% if tab == 'actionitems' %}
 								{% switch "actionitems" %}
 									<td class="id"><a href="{% url "publicweb_item_detail" object.origin.id %}#act_id_{{ object.id }}">{{ object.id }}</a></td>
+									<td>
+	                                    <a href="{% if object.done %}{% url 'unset_actionitem_done' object.id %}{% else %}{% url 'set_actionitem_done' object.id %}{% endif %}?next={{ request.path_info }}" aria-label="{% if object.done %}Mark item as not done.{% else %}Mark item as done{% endif %}">
+	                                        {% if object.done %}&#x2611;{% else %}&#x2610;{% endif %}
+	                                    </a>
+                                    </td>
 									<td class="excerpt"><a href="{% url "publicweb_item_detail" object.origin.id %}#act_id_{{ object.id }}">{{ object.description|get_excerpt }}</a></td>
 									<td><a href="{% url "publicweb_item_detail" object.origin.id %}#act_id_{{ object.id }}">{{ object.responsible }}</a></td>
 									<td><a href="{% url "publicweb_item_detail" object.origin.id %}#act_id_{{ object.id }}">{{ object.deadline }}</a></td>
@@ -78,7 +83,7 @@
                                     <a href="{% if request.user|is_watching:object %}{% url 'remove_watcher' object.id %}{% else %}{% url 'add_watcher' object.id %}{% endif %}?next={{ request.path_info }}">
                                         <input type="checkbox"{% if request.user|is_watching:object %} checked="True"{% endif %} />
                                     </a>
-                                 </td>
+                                </td>
 				                <td class="excerpt"><a href="{% url 'publicweb_item_detail' object.id %}">{{ object.excerpt }}	</a></td>
 				                {% if tab == 'decision' %}
 				                    <td><a href="{% url 'publicweb_item_detail' object.id %}">{{ object.decided_date }}</a></td>
