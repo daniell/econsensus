@@ -8,8 +8,9 @@ from mock import patch, Mock
 from organizations.models import Organization
 from signals.management import DECISION_CHANGE
 
-from ..models import Decision
-from ..single_action_views import AddWatcher, RemoveWatcher
+# For some reason using relative imports throws an error
+from publicweb.models import Decision
+from publicweb.single_action_views import AddWatcher, RemoveWatcher
 
 
 class WatcherViewTest(SimpleTestCase):
@@ -94,17 +95,18 @@ class WatcherViewTest(SimpleTestCase):
         self.assertEqual('/accounts/login/?next=/%3Fnext%3D%252F', response['Location'])
 
     def test_add_watcher_for_non_existant_item_returns_404(self):
+        Decision.objects.all().delete()
         user = N(User)
 
         view = AddWatcher()
 
         request = RequestFactory().get('/', {'next': '/'})
         request.user = user
-        self.assertFalse(Decision.objects.exists())
 
         self.assertRaises(Http404, view.dispatch, request, decision_id=1)
 
     def test_add_watcher_for_item_from_different_org_returns_404(self):
+        Decision.objects.all().delete()
         organization = N(Organization)
         user = Mock(spec=User, id=1, organization_set=Mock(all=lambda: [organization]))
         decision = N(Decision)
@@ -114,7 +116,6 @@ class WatcherViewTest(SimpleTestCase):
 
         request = RequestFactory().get('/', {'next': '/'})
         request.user = user
-        self.assertFalse(Decision.objects.exists())
 
         self.assertRaises(Http404, view.dispatch, request, decision_id=1)
 
