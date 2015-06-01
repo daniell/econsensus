@@ -38,6 +38,7 @@
 					{% if user.is_authenticated %}
 						<a href="{% url 'django.contrib.flatpages.views.flatpage' url='/help/' %}">{% trans "Help" %}</a> |
 						<a href="{% url 'organization_list' %}">{% trans "Your Organizations" %}</a> |
+						{% if organization %}<a href="{% url 'notification_settings' organization.slug %}">{% trans "Notification Settings" %}</a> |{% endif %}
 						<a href="{% url 'your_details' %}">{% trans "Your Details" %}</a> |
 						<a href='{% url 'auth_logout' %}'> {%trans "Logout" %} <span class="not_translated">({{ user.username }})</span></a>
 					{% else %}
