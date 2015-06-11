@@ -39,11 +39,12 @@ class FeedbackTest(DecisionTestCase):
         form.fields['watch'] = False
         # Empty the test outbox
         mail.outbox = []
+
         response = self.client.post(reverse('publicweb_feedback_update',
             args=[feedback.id]), form.fields)
 
         self.assertEqual(302, response.status_code)
-        self.assertEqual(1, len(mail.outbox))
+        self.assertEqual([user.email for user in decision.organization.users.filter(is_active=True)], [to for email in mail.outbox for to in email.to])
 
     def test_adding_feedback_with_watch_set_adds_user_as_watcher(self):
         decision = self.create_and_return_decision()

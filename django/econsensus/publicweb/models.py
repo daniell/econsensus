@@ -33,7 +33,7 @@ from publicweb.observation_manager import ObservationManager
 # separate file to prevent circular imports. They need to be here or django
 # won't detect them.
 from publicweb.extra_models import (STANDARD_SENDING_HEADERS,
-    NotificationSettings, FEEDBACK_MAJOR_CHANGES)  # pylint: disable=W0611
+    NotificationSettings, MINOR_CHANGES_NOTIFICATIONS)  # pylint: disable=W0611
 from django.dispatch.dispatcher import receiver
 from django_comments.models import Comment
 from django_comments.signals import comment_was_posted
@@ -381,27 +381,13 @@ def comment_posted_signal_handler(sender, **kwargs):
     decision = comment.content_object.decision
     user = comment.user
 
-    need_to_resend_message = additional_message_required(
-        user, decision, FEEDBACK_MAJOR_CHANGES
-    )
-
     change_observers(post.get('watch', False), decision, user)
 
-    if need_to_resend_message:
-        send_comment_notifications(comment, [comment.user])
+    decision.note_external_modification()
 
+    org_users = list(comment.content_object.decision.organization.users.filter(is_active=True))
 
-# TODO: Test this
-@receiver(models.signals.post_save, sender=Comment, dispatch_uid="publicweb.models.comment_saved_signal_handler")
-def comment_saved_signal_handler(sender, **kwargs):
-    instance = kwargs.get('instance')
-
-    instance.content_object.decision.note_external_modification()
-
-    if kwargs.get('created', True):
-        org_users = list(instance.content_object.decision.organization.users.filter(is_active=True))
-        # All watchers of parent get notified of new feedback.
-        send_comment_notifications(instance, org_users)
+    send_comment_notifications(comment, org_users)
 
 
 def actionitem_signal_handler(sender, **kwargs):
