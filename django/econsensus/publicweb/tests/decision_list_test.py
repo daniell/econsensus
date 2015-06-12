@@ -89,7 +89,7 @@ class DecisionListTest(DecisionTestCase):
         last_modifieds = [decision.last_modified for decision in decisions]
         ids = [decision.id for decision in decisions]
         feedbackcounts = [decision.feedbackcount() for decision in decisions]
-        excerpts = [decision.excerpt for decision in decisions]
+        excerpts = [unicode(decision.excerpt) for decision in decisions]
         #############################
 
         # we need sorted values to compare against
@@ -197,7 +197,7 @@ class DecisionListTest(DecisionTestCase):
         class DummyPageObject:
             def __init__(self, **kwargs):
                 self.__dict__.update(kwargs)
-        page_obj = DummyPageObject(previous_page_number=lambda: 2, next_page_number=lambda: 4)
+        page_obj = DummyPageObject(previous_page_number=lambda: 2, number=3, next_page_number=lambda: 4)
 
         test_cases = [{'name': 'Test A', 'page_obj': page_obj, 'context': {'num': default_num, 'sort': default_sort}, 'expectedprev': '?page=2', 'expectednext': '?page=4'},
                       {'name': 'Test B', 'page_obj': page_obj, 'context': {'num': default_num, 'sort': 'excerpt'}, 'expectedprev': '?sort=excerpt&page=2', 'expectednext': '?sort=excerpt&page=4'},

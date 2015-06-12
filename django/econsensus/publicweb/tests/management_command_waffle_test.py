@@ -3,7 +3,7 @@ import sys
 
 from django.core import management
 
-from waffle import Switch, Flag, Sample
+from waffle.models import Switch, Flag, Sample
 
 from publicweb.tests.open_consent_test_case import EconsensusFixtureTestCase
 

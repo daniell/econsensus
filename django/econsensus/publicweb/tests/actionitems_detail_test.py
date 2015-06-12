@@ -1,7 +1,7 @@
 from django.test.client import RequestFactory
 from django_dynamic_fixture import G
 from django.contrib.auth.models import AnonymousUser
-from waffle import Switch
+from waffle.models import Switch
 
 from actionitems.models import ActionItem
 

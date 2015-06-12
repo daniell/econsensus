@@ -60,11 +60,11 @@ class DecisionsTest(DecisionTestCase):
 
         post_dict.update({  'description': 'Make Eggs',
                             'watch': False,
+                            'minor_edit': False,
                             'submit': "Submit"})
 
         response = self.client.post(path, post_dict,
                                     follow=True)
-
 
         self.assertRedirects(
             response,
@@ -124,6 +124,7 @@ class DecisionsTest(DecisionTestCase):
                            'feedback_set-TOTAL_FORMS': '3',
                            'feedback_set-INITIAL_FORMS': '0',
                            'feedback_set-MAX_NUM_FORMS': '',
+                           'minor_edit': False
                            }
         response = self.client.post(path, post_dict)
         return response

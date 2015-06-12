@@ -3,7 +3,7 @@ from django.test.client import RequestFactory
 from django.core.urlresolvers import reverse, resolve
 from django.contrib.auth.models import User
 from BeautifulSoup import BeautifulSoup
-from waffle import Switch
+from waffle.models import Switch
 
 from decision_test_case import DecisionTestCase
 

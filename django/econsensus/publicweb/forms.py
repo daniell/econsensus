@@ -1,7 +1,6 @@
 # Create your forms here.
 
 from django import forms
-from models import Decision, Feedback
 from django.contrib.auth.models import User
 
 
@@ -15,9 +14,12 @@ from publicweb.models import NotificationSettings, change_observers, \
     additional_message_required, send_decision_notifications
 
 from parsley.decorators import parsleyfy
+
 from actionitems.forms import ActionItemCreateForm, ActionItemUpdateForm
+from notification.models import ObservedItem
 from publicweb.extra_models import MAIN_ITEMS_NOTIFICATIONS_ONLY
-from actionitems.models import ActionItem
+
+from models import Decision, Feedback
 
 
 class YourDetailsForm(forms.ModelForm):
@@ -41,6 +43,10 @@ class YourDetailsForm(forms.ModelForm):
 
 
 class NotificationsForm(forms.ModelForm):
+    class Meta:
+        model = ObservedItem
+        fields = ()
+
     watch = forms.BooleanField(
         required=False,
         label=_("Watch this conversation"),

@@ -1,7 +1,7 @@
 """
 Tests for the csv export functionality
 
-TODO: Check that when you add or update a decision it is reflected in the output.		      
+TODO: Check that when you add or update a decision it is reflected in the output.
 """
 
 from open_consent_test_case import EconsensusFixtureTestCase
@@ -23,23 +23,23 @@ class CsvTest(EconsensusFixtureTestCase):
         path = reverse('publicweb_export_csv', args=(self.test_user_org.slug,))
         response = self.client.get(path)
         self.assertEquals(response.status_code, 302)
-        self.assertTrue(response.get('Location','').find(
+        self.assertTrue(response.get('Location', '').find(
             'login/?next=/%s/export_csv' % self.test_user_org.slug) >= 0)
 
     def test_export_csv_for_test_user_org(self):
-        self.login(self.test_user)
+        self.login(self.test_user.username)
         path = reverse('publicweb_export_csv', args=(self.test_user_org.slug,))
         response = self.client.get(path)
         self.assertEquals(response.status_code, 200)
         self.assertEquals(
-            response['Content-Disposition'], 
+            response['Content-Disposition'],
             'attachment; filename=econsensus_decision_data_%s.csv' % self.test_user_org.slug
         )
-        self.assertEquals(response['Content-Type'],	'text/csv')
+        self.assertEquals(response['Content-Type'], 	'text/csv')
         self.assertTrue(len(response.content) > 0)
 
     def test_export_csv_for_other_org(self):
-        self.login(self.test_user)
+        self.login(self.test_user.username)
         path = reverse('publicweb_export_csv', args=(self.other_org.slug,))
         response = self.client.get(path)
         self.assertEquals(response.status_code, 403)

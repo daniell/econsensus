@@ -1,4 +1,4 @@
-from waffle import Switch, Flag, Sample
+from waffle.models import Switch, Flag, Sample
 from django.core.management.base import BaseCommand
 
 

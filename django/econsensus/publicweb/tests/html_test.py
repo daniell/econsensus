@@ -127,7 +127,7 @@ class HtmlTest(EconsensusFixtureTestCase):
         path = reverse('publicweb_item_detail', args=[proposal.id])
         response = self.client.get(path)
         self.assertNotContains(response, test_string)
-        
+
     def test_h2_header_on_form_matches_selected_status(self):
         path = reverse('publicweb_decision_create', args=[self.bettysorg.slug, Decision.PROPOSAL_STATUS])
         response = self.client.get(path)
@@ -169,11 +169,11 @@ class HtmlTest(EconsensusFixtureTestCase):
         decision = self.make_decision()
         kwargs = {'org_slug' : decision.organization.slug,
                   'status': decision.status}
-        response = DecisionList(template_name='decision_list.html').dispatch(request, **kwargs)
+        response = DecisionList.as_view(template_name='decision_list.html')(request, **kwargs)
         self.assertContains(response, decision.description)
 
         kwargs = {'pk' : decision.pk}
-        response = DecisionDetail(template_name='item_detail.html').dispatch(request, **kwargs)
+        response = DecisionDetail.as_view(template_name='item_detail.html')(request, **kwargs)
         self.assertContains(response, decision.description)
 
         members = [x.username for x in decision.organization.users.all()]
@@ -184,9 +184,9 @@ class HtmlTest(EconsensusFixtureTestCase):
         request.user = self.user
         kwargs = {'org_slug' : decision.organization.slug,
                   'status': decision.status}
-        response = DecisionList(template_name='decision_list.html').dispatch(request, **kwargs)
+        response = DecisionList.as_view(template_name='decision_list.html')(request, **kwargs)
         self.assertNotContains(response, decision.description)
 
         kwargs = { 'pk' : decision.pk }
-        response = DecisionDetail(template_name='item_detail.html').dispatch(request, **kwargs)
+        response = DecisionDetail.as_view(template_name='item_detail.html')(request, **kwargs)
         self.assertNotContains(response, decision.description)
