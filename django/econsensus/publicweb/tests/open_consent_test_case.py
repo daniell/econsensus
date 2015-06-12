@@ -4,7 +4,8 @@ from django.core.urlresolvers import reverse
 from django.db.models.fields import FieldDoesNotExist
 from django.contrib.admin.options import ModelAdmin
 from django.contrib.admin.sites import AdminSite
-from django.contrib.comments import Comment, signals
+from django_comments.models import Comment
+from django_comments import signals
 from django.contrib.sites.models import Site
 from django.utils import timezone
 
@@ -48,7 +49,7 @@ class EconsensusFixtureTestCase(EconsensusTestCase):
         required = {'description': 'Default description text',
                     'organization': Organization.active.get_for_user(self.user).latest('id'),
                     'status': Decision.PROPOSAL_STATUS}
-        for (key,value) in required.items():
+        for (key, value) in required.items():
             if key not in kwargs.keys():
                 kwargs[key] = value
         return self.make_model_instance(Decision, **kwargs)
@@ -58,7 +59,7 @@ class EconsensusFixtureTestCase(EconsensusTestCase):
                     'resolved': False,
                     'author': self.user,
                     'rating': Feedback.DANGER_STATUS}
-        for (key,value) in required.items():
+        for (key, value) in required.items():
             if key not in kwargs.keys():
                 kwargs[key] = value
         return self.make_model_instance(Feedback, **kwargs)
@@ -68,26 +69,26 @@ class EconsensusFixtureTestCase(EconsensusTestCase):
                     'user': self.user,
                     'submit_date': timezone.now(),
                     'site':Site.objects.get_current()}
-        for (key,value) in required.items():
+        for (key, value) in required.items():
             if key not in kwargs.keys():
                 kwargs[key] = value
-        
+
         comment = self.make_model_instance(Comment, **kwargs)
         del kwargs['comment']
         self.send_comment_posted_signal(comment, **kwargs)
         return comment
-    
+
     def send_comment_posted_signal(self, comment, **kwargs):
         request = RequestFactory().post('/', kwargs)
-        signals.comment_was_posted.send(Comment, 
+        signals.comment_was_posted.send(Comment,
             request=request, comment=comment)
 
     def make_model_instance(self, model, **kwargs):
         instance = model()
-        for (key,value) in kwargs.items():
+        for (key, value) in kwargs.items():
             try:
                 instance._meta.get_field(key)
-                setattr(instance,key,value)
+                setattr(instance, key, value)
             except FieldDoesNotExist:
                 pass
         instance.full_clean()
@@ -104,7 +105,7 @@ class EconsensusFixtureTestCase(EconsensusTestCase):
         return Decision.objects.get(description=description)
 
     def update_decision_through_browser(self, idd,
-            description = 'Aenean eros nibh'):
+            description='Aenean eros nibh'):
         path = reverse('publicweb_decision_update', args=[idd])
         post_dict = {'description': description,
                      'status': Decision.PROPOSAL_STATUS,
@@ -123,7 +124,7 @@ class EconsensusFixtureTestCase(EconsensusTestCase):
         return Feedback.objects.get(description=description)
 
     def update_feedback_through_browser(self, idd,
-            description = 'nibh ut dignissim. Sed a aliquet quam', watch=True):
+            description='nibh ut dignissim. Sed a aliquet quam', watch=True):
         path = reverse('publicweb_feedback_update', args=[idd])
         post_dict = {'description': description,
                      'rating': Feedback.COMMENT_STATUS}

@@ -1,14 +1,14 @@
 import factory
 
 from django.contrib.auth.models import User
-from django.contrib.comments.models import Comment
+from django_comments.models import Comment
 from django.contrib.sites.models import Site
 
 from organizations.models import (Organization, OrganizationUser,
     OrganizationOwner)
 
-from publicweb.models import Decision, Feedback 
-from notification.models import (ObservedItem, NoticeType, 
+from publicweb.models import Decision, Feedback
+from notification.models import (ObservedItem, NoticeType,
     NOTICE_MEDIA_DEFAULTS, NOTICE_MEDIA)
 from publicweb.extra_models import (NotificationSettings,
     MAIN_ITEMS_NOTIFICATIONS_ONLY)
@@ -64,10 +64,10 @@ class NotificationSettingsFactory(factory.DjangoModelFactory):
 class NoticeTypeFactory(factory.DjangoModelFactory):
     FACTORY_FOR = NoticeType
     default = NOTICE_MEDIA_DEFAULTS[NOTICE_MEDIA[0][0]]
-    
+
 class ObservedItemFactory(factory.DjangoModelFactory):
     FACTORY_FOR = ObservedItem
-    
+
     user = factory.SubFactory(UserFactory)
     observed_object = factory.SubFactory(DecisionFactory)
     notice_type = factory.SubFactory(NoticeTypeFactory)

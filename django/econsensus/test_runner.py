@@ -1,6 +1,5 @@
 from django.core.exceptions import ImproperlyConfigured
-from django.test.simple import DjangoTestSuiteRunner, \
-    reorder_suite, build_suite
+from django.test.runner import DiscoverRunner, reorder_suite
 from django.test.testcases import TestCase
 from django.db.models import get_apps
 from django.utils.importlib import import_module
@@ -16,7 +15,7 @@ except ImportError:
                                    "or install the unittest2 library.")
 
 
-class DiscoveryRunner(DjangoTestSuiteRunner):
+class DiscoveryRunner(DiscoverRunner):
     """
     A test suite runner combining default django behavior with the smart
     test discovery of djano-discover-runner. With snippets taken from carljm

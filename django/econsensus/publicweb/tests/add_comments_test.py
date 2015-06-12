@@ -6,7 +6,7 @@ from django.contrib.auth.models import User
 from mock import patch, MagicMock, Mock
 from custom_comments.forms import CustomCommentForm
 from django.utils.crypto import salted_hmac
-from django.contrib.comments.models import Comment
+from django_comments.models import Comment
 from django.test.client import RequestFactory
 import time
 from notification import models as notification
